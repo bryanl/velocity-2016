@@ -1,0 +1,13 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingresstest
+spec:
+  rules:
+  - host: k8stest.x.pifft.com
+    http:
+      paths:
+      - path: /frontend
+        backend:
+          serviceName: frontend
+          servicePort: 80
