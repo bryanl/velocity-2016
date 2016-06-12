@@ -56,7 +56,6 @@ save_last_run_log_and_cleanup() {
 case "$(hostname)" in
   kube-etcd-1)
     save_last_run_log_and_cleanup etcd1
-    docker pull weaveworks/kubernetes-anywhere:etcd-v1.2
     docker run --detach \
       --env="ETCD_CLUSTER_SIZE=3" \
       --name="etcd1" \
@@ -64,7 +63,6 @@ case "$(hostname)" in
     ;;
   kube-etcd-2)
     save_last_run_log_and_cleanup etcd2
-    docker pull weaveworks/kubernetes-anywhere:etcd-v1.2
     docker run --detach \
       --env="ETCD_CLUSTER_SIZE=3" \
       --name="etcd2" \
@@ -72,7 +70,6 @@ case "$(hostname)" in
     ;;
   kube-etcd-3)
     save_last_run_log_and_cleanup etcd3-v1.2
-    docker pull weaveworks/kubernetes-anywhere:etcd-v1.2
     docker run --detach \
       --env="ETCD_CLUSTER_SIZE=3" \
       --name="etcd3" \
@@ -82,42 +79,53 @@ case "$(hostname)" in
     save_last_run_log_and_cleanup kube-apiserver
     save_last_run_log_and_cleanup kube-controller-manager
     save_last_run_log_and_cleanup kube-scheduler
-    docker pull weaveworks/kubernetes-anywhere:apiserver-v1.2
-    docker pull weaveworks/kubernetes-anywhere:controller-manager-v1.2
-    docker pull weaveworks/kubernetes-anywhere:scheduler-v1.2
+
+    docker run --name=kube-apiserver-pki bryanl/k8s-anywhere:apiserver-pki
     docker run --detach \
       --env="ETCD_CLUSTER_SIZE=3" \
       --name="kube-apiserver" \
+      --volumes-from=kube-apiserver-pki \
         weaveworks/kubernetes-anywhere:apiserver-v1.2
-    docker run --detach \
-      --name="kube-controller-manager" \
-        weaveworks/kubernetes-anywhere:controller-manager-v1.2
-    docker run --detach \
-      --name="kube-scheduler" \
-        weaveworks/kubernetes-anywhere:scheduler-v1.2
+    docker run --name=kube-controller-manager-pki bryanl/k8s-anywhere:controller-manager-pki
+    docker run -d \
+      --name=kube-controller-manager \
+      --volumes-from=kube-controller-manager-pki \
+        weaveworks/kubernetes-anywhere:controller-manager
+    docker run --name=kube-scheduler-pki bryanl/k8s-anywhere:scheduler-pki
+    docker run -d \
+      --name=kube-scheduler \
+      --volumes-from=kube-scheduler-pki \
+        weaveworks/kubernetes-anywhere:scheduler
+
+    docker run --name=kube-toolbox-pki bryanl/k8s-anywhere:toolbox-pki
     ;;
   ## kube-[5..N] are the cluster nodes
   kube-node-*)
     save_last_run_log_and_cleanup kubelet
     save_last_run_log_and_cleanup kube-proxy
-    docker pull weaveworks/kubernetes-anywhere:toolbox-v1.2
-    docker pull weaveworks/kubernetes-anywhere:kubelet-v1.2
-    docker pull weaveworks/kubernetes-anywhere:proxy-v1.2
-    docker run \
-      --env="USE_CNI=yes" \
-      --volume="/:/rootfs" \
-      --volume="/var/run/docker.sock:/docker.sock" \
-        weaveworks/kubernetes-anywhere:toolbox-v1.2 \
-          setup-kubelet-volumes
-    docker run --detach \
-      --env="USE_CNI=yes" \
-      --name="kubelet" \
-      --privileged="true" --net="host" --pid="host" \
-      --volumes-from="kubelet-volumes" \
-        weaveworks/kubernetes-anywhere:kubelet-v1.2
-    docker run --detach \
-      --name="kube-proxy" \
-      --privileged="true" --net="host" --pid="host" \
-        weaveworks/kubernetes-anywhere:proxy-v1.2
+
+    docker run -v /:/rootfs \
+      -v /var/run/docker.sock:/docker.sock \
+        weaveworks/kubernetes-anywhere:toolbox setup-kubelet-volumes
+    docker run --name=kubelet-pki bryanl/k8s-anywhere:kubelet-pki
+    docker run -d \
+      --name=kubelet \
+      --privileged=true \
+      --net=host \
+      --pid=host \
+      --volumes-from=kubelet-volumes \
+      --volumes-from=kubelet-pki \
+         weaveworks/kubernetes-anywhere:kubelet
+
+    docker run --name=kube-proxy-pki bryanl/k8s-anywhere:proxy-pki
+    docker run -d \
+      --name=kube-proxy \
+      --privileged=true \
+      --net=host \
+      --pid=host \
+      --volumes-from=kube-proxy-pki \
+         weaveworks/kubernetes-anywhere:proxy
+
+    docker run --name=kube-toolbox-pki bryanl/k8s-anywhere:toolbox-pki
     ;;
 esac
