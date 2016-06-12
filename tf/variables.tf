@@ -37,3 +37,5 @@ variable "user" {
 }
 
 variable "private_key" {}
+
+variable "weave_encryption" {}

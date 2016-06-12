@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+export WEAVE_PASSWORD=$(cat /etc/terraform/weave_encryption)
+
 if ! /usr/bin/docker -v 2> /dev/null | grep -q "^Docker\ version\ 1\.10" ; then
   echo "Installing current version of Docker Engine 1.10"
   curl --silent --location  https://get.docker.com/builds/Linux/x86_64/docker-1.10.3  --output /usr/bin/docker

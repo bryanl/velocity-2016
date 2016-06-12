@@ -6,6 +6,7 @@ module "etcd-bootstrap" {
   private_key = "${var.private_key}"
   user = "${var.user}"
   member_ips = "${join(" ", concat(digitalocean_droplet.etcd.*.ipv4_address_private, digitalocean_droplet.master.*.ipv4_address_private, digitalocean_droplet.node.*.ipv4_address_private))}"
+  weave_encryption = "${var.weave_encryption}"
 }
 
 module "master-bootstrap" {
@@ -16,6 +17,7 @@ module "master-bootstrap" {
   private_key = "${var.private_key}"
   user = "${var.user}"
   member_ips = "${join(" ", concat(digitalocean_droplet.etcd.*.ipv4_address_private, digitalocean_droplet.master.*.ipv4_address_private, digitalocean_droplet.node.*.ipv4_address_private))}"
+  weave_encryption = "${var.weave_encryption}"
 }
 
 module "node-bootstrap" {
@@ -26,6 +28,7 @@ module "node-bootstrap" {
   private_key = "${var.private_key}"
   user = "${var.user}"
   member_ips = "${join(" ", concat(digitalocean_droplet.etcd.*.ipv4_address_private, digitalocean_droplet.master.*.ipv4_address_private, digitalocean_droplet.node.*.ipv4_address_private))}"
+  weave_encryption = "${var.weave_encryption}"
 }
 
 
