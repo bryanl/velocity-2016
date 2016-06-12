@@ -1,3 +1,34 @@
+module "etcd-bootstrap" {
+  source = "./member-bootstrap"
+
+  hosts = "${join(",", digitalocean_droplet.etcd.*.ipv4_address)}"
+  count = "${var.etcd_count}"
+  private_key = "${var.private_key}"
+  user = "${var.user}"
+  member_ips = "${join(" ", concat(digitalocean_droplet.etcd.*.ipv4_address_private, digitalocean_droplet.master.*.ipv4_address_private, digitalocean_droplet.node.*.ipv4_address_private))}"
+}
+
+module "master-bootstrap" {
+  source = "./member-bootstrap"
+
+  hosts = "${join(",", digitalocean_droplet.master.*.ipv4_address)}"
+  count = "${var.master_count}"
+  private_key = "${var.private_key}"
+  user = "${var.user}"
+  member_ips = "${join(" ", concat(digitalocean_droplet.etcd.*.ipv4_address_private, digitalocean_droplet.master.*.ipv4_address_private, digitalocean_droplet.node.*.ipv4_address_private))}"
+}
+
+module "node-bootstrap" {
+  source = "./member-bootstrap"
+
+  hosts = "${join(",", digitalocean_droplet.node.*.ipv4_address)}"
+  count = "${var.node_count}"
+  private_key = "${var.private_key}"
+  user = "${var.user}"
+  member_ips = "${join(" ", concat(digitalocean_droplet.etcd.*.ipv4_address_private, digitalocean_droplet.master.*.ipv4_address_private, digitalocean_droplet.node.*.ipv4_address_private))}"
+}
+
+
 resource "digitalocean_droplet" "etcd" {
   count = "${var.etcd_count}"
   image = "${var.image}"
@@ -76,80 +107,3 @@ resource "digitalocean_droplet" "node" {
   }
 }
 
-resource "null_resource" "etcd-bootstrap" {
-  count = "${var.etcd_count}"
-  connection {
-    host = "${element(digitalocean_droplet.etcd.*.ipv4_address, count.index)}"
-    type = "ssh"
-    key_file = "${var.private_key}"
-    user = "${var.user}"
-  }
-
-  provisioner "file" {
-    source = "scripts/provision.sh"
-    destination = "/usr/local/bin/provision.sh"
-  }
-
-  provisioner "remote-exec" {
-    inline = [
-      "mkdir -p /etc/terraform",
-      "echo '${join(" ",digitalocean_droplet.etcd.*.ipv4_address_private)}' > /etc/terraform/etcd_ip",
-      "echo '${join(" ",digitalocean_droplet.master.*.ipv4_address_private)}' > /etc/terraform/master_ip",
-      "echo '${join(" ",digitalocean_droplet.node.*.ipv4_address_private)}' > /etc/terraform/node_ip",
-      "chmod +x /usr/local/bin/provision.sh",
-      "/usr/local/bin/provision.sh 2>&1 > /tmp/provision.out"
-    ]
-  }
-}
-
-resource "null_resource" "master-bootstrap" {
-  count = "${var.master_count}"
-  connection {
-    host = "${element(digitalocean_droplet.master.*.ipv4_address, count.index)}"
-    type = "ssh"
-    key_file = "${var.private_key}"
-    user = "${var.user}"
-  }
-
-  provisioner "file" {
-    source = "scripts/provision.sh"
-    destination = "/usr/local/bin/provision.sh"
-  }
-
-  provisioner "remote-exec" {
-    inline = [
-      "mkdir -p /etc/terraform",
-      "echo '${join(" ",digitalocean_droplet.etcd.*.ipv4_address_private)}' > /etc/terraform/etcd_ip",
-      "echo '${join(" ",digitalocean_droplet.master.*.ipv4_address_private)}' > /etc/terraform/master_ip",
-      "echo '${join(" ",digitalocean_droplet.node.*.ipv4_address_private)}' > /etc/terraform/node_ip",
-      "chmod +x /usr/local/bin/provision.sh",
-      "/usr/local/bin/provision.sh 2>&1 > /tmp/provision.out"
-    ]
-  }
-}
-
-resource "null_resource" "node-bootstrap" {
-  count = "${var.node_count}"
-  connection {
-    host = "${element(digitalocean_droplet.node.*.ipv4_address, count.index)}"
-    type = "ssh"
-    key_file = "${var.private_key}"
-    user = "${var.user}"
-  }
-
-  provisioner "file" {
-    source = "scripts/provision.sh"
-    destination = "/usr/local/bin/provision.sh"
-  }
-
-  provisioner "remote-exec" {
-    inline = [
-      "mkdir -p /etc/terraform",
-      "echo '${join(" ",digitalocean_droplet.etcd.*.ipv4_address_private)}' > /etc/terraform/etcd_ip",
-      "echo '${join(" ",digitalocean_droplet.master.*.ipv4_address_private)}' > /etc/terraform/master_ip",
-      "echo '${join(" ",digitalocean_droplet.node.*.ipv4_address_private)}' > /etc/terraform/node_ip",
-      "chmod +x /usr/local/bin/provision.sh",
-      "/usr/local/bin/provision.sh 2>&1 > /tmp/provision.out"
-    ]
-  }
-}

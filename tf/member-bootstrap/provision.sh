@@ -23,21 +23,23 @@ fi
 
 /usr/bin/weave launch-proxy --rewrite-inspect
 
-for i in etcd_ip master_ip node_ips; do
+for i in member_ips; do
   /usr/bin/weave connect $(cat /etc/terraform/$i)
 done
 
 /usr/bin/weave expose -h $(hostname).weave.local
 
-if ! [ -x /usr/bin/scope ] ; then
-  echo "Installing current version of Weave Scope"
-  curl --silent --location http://git.io/scope --output /usr/bin/scope
-  chmod +x /usr/bin/scope
-fi
 
-/usr/bin/scope version
+# TODO enable once scope is secured
+# if ! [ -x /usr/bin/scope ] ; then
+#   echo "Installing current version of Weave Scope"
+#   curl --silent --location http://git.io/scope --output /usr/bin/scope
+#   chmod +x /usr/bin/scope
+# fi
 
-/usr/bin/scope launch --probe.kubernetes="true" --probe.kubernetes.api="http://kube-apiserver.weave.local:8080"
+# /usr/bin/scope version
+
+# /usr/bin/scope launch --probe.kubernetes="true" --probe.kubernetes.api="http://kube-apiserver.weave.local:8080"
 
 eval $(/usr/bin/weave env)
 

@@ -1,3 +1,4 @@
 tf/terraform.tfstate
 tf/terraform.tfstate.backup
 tf/terraform.tfvars
+tf/.terraform
