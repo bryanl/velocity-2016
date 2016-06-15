@@ -18,6 +18,8 @@ if ! [ -x /usr/bin/weave ] ; then
   echo "Installing current version of Weave Net"
   curl --silent --location http://git.io/weave --output /usr/bin/weave
   chmod +x /usr/bin/weave
+  mkdir -p /opt/cni/bin
+  mkdir -p /etc/cni/net.d
   /usr/bin/weave setup
 fi
 
@@ -107,10 +109,12 @@ case "$(hostname)" in
     save_last_run_log_and_cleanup kube-proxy
 
     docker run -v /:/rootfs \
+      --env="USE_CNI=yes" \
       -v /var/run/docker.sock:/docker.sock \
         weaveworks/kubernetes-anywhere:toolbox setup-kubelet-volumes
     docker run --name=kubelet-pki bryanl/k8s-anywhere:kubelet-pki
     docker run -d \
+      --env="USE_CNI=yes" \
       --name=kubelet \
       --privileged=true \
       --net=host \
@@ -121,6 +125,7 @@ case "$(hostname)" in
 
     docker run --name=kube-proxy-pki bryanl/k8s-anywhere:proxy-pki
     docker run -d \
+      --env="USE_CNI=yes" \
       --name=kube-proxy \
       --privileged=true \
       --net=host \
