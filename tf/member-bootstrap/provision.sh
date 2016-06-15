@@ -2,6 +2,8 @@
 #!/usr/bin/env bash
 sysctl -p /etc/sysctl.conf
 
+MYIP=$(ifconfig eth0 | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1')
+
 export WEAVE_PASSWORD=$(cat /etc/terraform/weave_encryption)
 
 if ! /usr/bin/docker -v 2> /dev/null | grep -q "^Docker\ version\ 1\.10" ; then
@@ -63,21 +65,21 @@ case "$(hostname)" in
     docker run --detach \
       --env="ETCD_CLUSTER_SIZE=3" \
       --name="etcd1" \
-        weaveworks/kubernetes-anywhere:etcd-v1.2
+        bryanl/k8s-do:etcd-v1.2
     ;;
   kube-etcd-2)
     save_last_run_log_and_cleanup etcd2
     docker run --detach \
       --env="ETCD_CLUSTER_SIZE=3" \
       --name="etcd2" \
-        weaveworks/kubernetes-anywhere:etcd-v1.2
+        bryanl/k8s-do:etcd-v1.2
     ;;
   kube-etcd-3)
     save_last_run_log_and_cleanup etcd3-v1.2
     docker run --detach \
       --env="ETCD_CLUSTER_SIZE=3" \
       --name="etcd3" \
-        weaveworks/kubernetes-anywhere:etcd-v1.2
+        bryanl/k8s-do:etcd-v1.2
     ;;
   kube-master-1)
     save_last_run_log_and_cleanup kube-apiserver
@@ -89,17 +91,17 @@ case "$(hostname)" in
       --env="ETCD_CLUSTER_SIZE=3" \
       --name="kube-apiserver" \
       --volumes-from=kube-apiserver-pki \
-        weaveworks/kubernetes-anywhere:apiserver-v1.2
+        bryanl/k8s-do:apiserver-v1.2
     docker run --name=kube-controller-manager-pki bryanl/k8s-anywhere:controller-manager-pki
     docker run -d \
       --name=kube-controller-manager \
       --volumes-from=kube-controller-manager-pki \
-        weaveworks/kubernetes-anywhere:controller-manager
+        bryanl/k8s-do:controller-manager
     docker run --name=kube-scheduler-pki bryanl/k8s-anywhere:scheduler-pki
     docker run -d \
       --name=kube-scheduler \
       --volumes-from=kube-scheduler-pki \
-        weaveworks/kubernetes-anywhere:scheduler
+        bryanl/k8s-do:scheduler
 
     docker run --name=kube-toolbox-pki bryanl/k8s-anywhere:toolbox-pki
     ;;
@@ -111,7 +113,7 @@ case "$(hostname)" in
     docker run -v /:/rootfs \
       --env="USE_CNI=yes" \
       -v /var/run/docker.sock:/docker.sock \
-        weaveworks/kubernetes-anywhere:toolbox setup-kubelet-volumes
+        bryanl/k8s-do:toolbox setup-kubelet-volumes
     docker run --name=kubelet-pki bryanl/k8s-anywhere:kubelet-pki
     docker run -d \
       --env="USE_CNI=yes" \
@@ -121,7 +123,7 @@ case "$(hostname)" in
       --pid=host \
       --volumes-from=kubelet-volumes \
       --volumes-from=kubelet-pki \
-         weaveworks/kubernetes-anywhere:kubelet
+         bryanl/k8s-do:kubelet
 
     docker run --name=kube-proxy-pki bryanl/k8s-anywhere:proxy-pki
     docker run -d \
@@ -131,8 +133,11 @@ case "$(hostname)" in
       --net=host \
       --pid=host \
       --volumes-from=kube-proxy-pki \
-         weaveworks/kubernetes-anywhere:proxy
+         bryanl/k8s-do:proxy
 
     docker run --name=kube-toolbox-pki bryanl/k8s-anywhere:toolbox-pki
     ;;
+  kube-lb-*)
+    curl --silent --location https://storage.googleapis.com/kubernetes-release/release/v1.2.4/bin/linux/amd64/kubectl --output /usr/bin/kubectl
+    chmod +x /usr/bin/kubectl
 esac
