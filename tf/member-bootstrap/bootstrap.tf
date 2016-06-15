@@ -15,6 +15,11 @@ resource "null_resource" "bootstrap" {
   }
 
   provisioner "file" {
+    source = "${path.module}/sysctl.conf"
+    destination = "/etc/sysctl.conf"
+  }
+
+  provisioner "file" {
     source = "${path.module}/provision.sh"
     destination = "/usr/local/bin/provision.sh"
   }

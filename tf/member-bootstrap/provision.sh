@@ -1,4 +1,6 @@
+
 #!/usr/bin/env bash
+sysctl -p /etc/sysctl.conf
 
 export WEAVE_PASSWORD=$(cat /etc/terraform/weave_encryption)
 
