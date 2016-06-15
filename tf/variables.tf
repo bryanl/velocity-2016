@@ -32,6 +32,14 @@ variable "node_count" {
   default = "3"
 }
 
+variable "lb_count" {
+  default = "1"
+}
+
+variable "lb_size" {
+  default = "4gb"
+}
+
 variable "user" {
   default = "root"
 }

@@ -9,3 +9,7 @@ output "master_ip" {
 output "node_ip" {
   value = "${join(" ",digitalocean_droplet.node.*.ipv4_address_private)}"
 }
+
+output "lb_ip" {
+  value = "${join(" ",digitalocean_droplet.lb.*.ipv4_address_private)}"
+}
