@@ -47,3 +47,14 @@ variable "user" {
 variable "private_key" {}
 
 variable "weave_encryption" {}
+
+variable "cert_organization" {
+  default = "DigitalOcean Kubernetes"
+}
+
+variable "cert_validity_period_hours" {
+  # one year
+  default = 8760
+}
+
+variable "lb_domain" {}
