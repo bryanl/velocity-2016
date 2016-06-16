@@ -53,7 +53,7 @@ metadata:
   name: kibana-ingress
 spec:
   rules:
-  - host: kibana.demo
+  - host: kibana.site.x.pifft.com
     http:
       paths:
       - backend:
