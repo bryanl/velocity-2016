@@ -1,0 +1,15 @@
+[Unit]
+Description=Caddy HTTP/2 web server %I
+Documentation=https://caddyserver.com/docs
+After=network.target
+
+[Service]
+User=%i
+Group=http
+ExecStart=/usr/bin/caddy -agree=true -conf=/etc/caddy/Caddyfile
+Restart=on-failure
+PrivateTmp=true
+LimitNOFILE=8192
+
+[Install]
+WantedBy=multi-user.target

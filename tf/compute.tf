@@ -141,8 +141,30 @@ resource "digitalocean_droplet" "lb" {
 
   provisioner "remote-exec" {
     inline = [
-      "id"
+      "groupadd -r http",
+      "mkdir -p /etc/caddy/ssl",
+      "echo \"${tls_private_key.lb.private_key_pem}\" > /etc/caddy/ssl/site.key",
+      "echo \"${tls_self_signed_cert.lb.cert_pem}\" > /etc/caddy/ssl/site.crt",
+      "echo \"${template_file.caddyfile.rendered}\" > /etc/caddy/Caddyfile",
+      "echo \"${template_file.caddy_service.rendered}\" > /etc/systemd/system/caddy@.service",
+      "curl -o /tmp/caddy.tar.gz \"${var.caddy_url}\"",
+      "mkdir /tmp/caddy",
+      "tar -C /tmp/caddy -xvzf /tmp/caddy.tar.gz",
+      "cp /tmp/caddy/caddy /usr/bin/caddy",
+      "systemctl daemon-reload",
+      "systemctl start caddy@root"
     ]
   }
 }
 
+resource "template_file" "caddyfile" {
+  template = "${file("${path.module}/Caddyfile")}"
+
+  vars {
+    backends = "${join(" ", formatlist("%s:80", digitalocean_droplet.node.*.ipv4_address_private))}"
+  }
+}
+
+resource "template_file" "caddy_service" {
+  template = "${file("${path.module}/caddy@.service")}"
+}

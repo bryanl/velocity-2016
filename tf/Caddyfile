@@ -1,0 +1,9 @@
+:443 {
+  proxy / ${backends} {
+    proxy_header Host {host}
+  }
+  tls /etc/caddy/ssl/site.crt /etc/caddy/ssl/site.key {
+  }
+
+  log stderr
+}

@@ -8,7 +8,7 @@ resource "tls_self_signed_cert" "lb" {
   private_key_pem= "${tls_private_key.lb.private_key_pem}"
 
   subject {
-    common_name = "*.${lb_domain}"
+    common_name = "*.${var.lb_subdomain}.${var.lb_domain}"
     organization = "${var.cert_organization}"
   }
 
@@ -30,11 +30,5 @@ resource "null_resource" "configure_lb_cert" {
     user = "${var.user}"
   }
 
-  provisioner "remote-exec" {
-    inline = [
-      "mkdir -p /etc/caddy/ssl",
-      "echo \"${tls_private_key.lb.private_key_pem}\" > /etc/caddy/ssl/site.key",
-      "echo \"${tls_self_signed_cert.lb.cert_pem}\" > /etc/caddy/ssl/site.crt"
-    ]
-  }
 }
+

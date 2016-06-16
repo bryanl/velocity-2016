@@ -58,3 +58,9 @@ variable "cert_validity_period_hours" {
 }
 
 variable "lb_domain" {}
+
+variable "lb_subdomain" {}
+
+variable "caddy_url" {
+  default = "https://caddyserver.com/download/build?os=linux&arch=amd64&features="
+}
