@@ -19,7 +19,7 @@ spec:
       serviceAccount: elasticsearch
       containers:
       - name: logstash
-        image: bryanl/logstash:2.3.2
+        image: bryanl/docker-logstash:latest
         env:
         - name: KUBERNETES_TRUST_CERT
           value: "true"
