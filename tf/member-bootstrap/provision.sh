@@ -111,12 +111,12 @@ case "$(hostname)" in
     save_last_run_log_and_cleanup kube-proxy
 
     docker run -v /:/rootfs \
-      --env="USE_CNI=yes" \
+      --env="USE_CNI=no" \
       -v /var/run/docker.sock:/docker.sock \
         bryanl/k8s-do:toolbox setup-kubelet-volumes
     docker run --name=kubelet-pki bryanl/k8s-anywhere:kubelet-pki
     docker run -d \
-      --env="USE_CNI=yes" \
+      --env="USE_CNI=no" \
       --name=kubelet \
       --privileged=true \
       --net=host \
@@ -127,7 +127,7 @@ case "$(hostname)" in
 
     docker run --name=kube-proxy-pki bryanl/k8s-anywhere:proxy-pki
     docker run -d \
-      --env="USE_CNI=yes" \
+      --env="USE_CNI=no" \
       --name=kube-proxy \
       --privileged=true \
       --net=host \
