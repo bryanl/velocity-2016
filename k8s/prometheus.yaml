@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: prometheus
+  labels:
+    component: monitoring
+    role: prometheus
+spec:
+  replicas: 1
+  selector:
+    component: monitoring
+    role: prometheus
+  template:
+    metadata:
+      labels:
+        component: monitoring
+        role: prometheus
+    spec:
+      containers:
+      - name: prometheus
+        image: bryanl/docker-prometheus:latest
+        ports:
+        - containerPort: 9090
+          name: prometheus
+          protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus
+  labels:
+    component: monitoring
+    role: prometheus
+spec:
+  selector:
+    component: monitoring
+    role: prometheus
+  ports:
+    - name: http
+      port: 80
+      targetPort: 9090
+      protocol: TCP
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: prometheus-ingress
+spec:
+  rules:
+  - host: prometheus.site.x.pifft.com
+    http:
+      paths:
+      - backend:
+          serviceName: prometheus
+          servicePort: 80
+        path: /
