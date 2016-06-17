@@ -19,7 +19,6 @@ spec:
         - containerPort: 443
           hostPort: 443
         - containerPort: 8080
-          hostPort: 8080
         args:
         - --web
         - --kubernetes
