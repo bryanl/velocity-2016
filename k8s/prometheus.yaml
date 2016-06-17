@@ -47,7 +47,7 @@ metadata:
   name: prometheus-ingress
 spec:
   rules:
-  - host: prometheus.site.x.pifft.com
+  - host: prometheus.k8sdev
     http:
       paths:
       - backend:
