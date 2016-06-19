@@ -18,7 +18,6 @@ https://backend.site.x.pifft.com {
 }
 
 :443 {
-  basicauth / demo demo
   proxy / traefik.weave.local:80 {
     proxy_header Host {host}
   }
