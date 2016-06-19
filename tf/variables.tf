@@ -40,6 +40,14 @@ variable "lb_size" {
   default = "4gb"
 }
 
+variable "frontend_count" {
+  default = "1"
+}
+
+variable "frontend_size" {
+  default = "4gb"
+}
+
 variable "user" {
   default = "root"
 }
@@ -61,6 +69,6 @@ variable "lb_domain" {}
 
 variable "lb_subdomain" {}
 
-variable "caddy_url" {
-  default = "https://caddyserver.com/download/build?os=linux&arch=amd64&features="
-}
+variable "traefik_kubernetes_token" {}
+
+variable "traefik_kubernetes_cacert" {}

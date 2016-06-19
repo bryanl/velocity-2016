@@ -1,0 +1,14 @@
+logLevel = "INFO"
+
+defaultEntryPoints = ["http"]
+
+[web]
+address = ":8080"
+
+[entryPoints]
+  [entryPoints.http]
+  address = ":80"
+
+[kubernetes]
+endpoint = "https://kube-apiserver.weave.local:6443"
+namespaces = ["default"]
