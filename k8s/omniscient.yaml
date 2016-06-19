@@ -1,0 +1,91 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: omniscient
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: omniscient
+        tier: frontend
+    spec:
+      containers:
+        - name: omniscient
+          image: bryanl/omniscient:velocity-stage-0
+          imagePullPolicy: Always
+          env:
+          - name: OMNISCIENT_REDIS_ADDR
+            value: "redis-master:6379"
+          - name: OMNISCIENT_SENTRY_URL
+            valueFrom:
+              secretKeyRef:
+                name: omniscient-secret
+                key: dsn.txt
+          ports:
+          - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: omniscient
+  labels:
+    app: omniscient
+    tier: frontend
+spec:
+  ports:
+  - port: 80
+    targetPort: 8080
+  selector:
+    app: omniscient
+    tier: frontend
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: redis-master
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: redis
+        role: master
+        tier: backend
+    spec:
+      containers:
+        - name: redis-master
+          image: redis
+          ports:
+          - containerPort: 6379
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-master
+  labels:
+    app: redis
+    role: master
+    tier: backend
+spec:
+  ports:
+  - port: 6379
+    targetPort: 6379
+  selector:
+    app: redis
+    role: master
+    tier: backend
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: omniscient-ingress
+spec:
+  rules:
+  - host: omniscient.site.x.pifft.com
+    http:
+      paths:
+      - backend:
+          serviceName: omniscient
+          servicePort: 80
+        path: /
