@@ -4,8 +4,9 @@ Documentation=https://github.com/containous/traefik
 After=network.target
 
 [Service]
-ExecStart=/usr/bin/docker run  -p 8080:8080 -p 80:80 -p 443:443 -v /etc/traefik/traefik.toml:/etc/traefik.toml -v /var/run/weave/weave.sock:/var/run/docker.sock -v /var/run/secrets/kubernetes.io/serviceaccount/:/var/run/secrets/kubernetes.io/serviceaccount/ --name traefik traefik -c /etc/traefik.toml
-ExecStop=/usr/bin/docker stop -t 2 traefik; /usr/bin/docker rm -f traefik
+Environment=DOCKER_HOST=unix:///var/run/weave/weave.sock
+ExecStart=/usr/bin/docker run  -h traefik.weave.local -v /etc/traefik/traefik.toml:/etc/traefik.toml -v /var/run/secrets/kubernetes.io/serviceaccount/:/var/run/secrets/kubernetes.io/serviceaccount/ --name traefik traefik -c /etc/traefik.toml
+ExecStop=/usr/bin/docker stop -t 2 traefik && /usr/bin/docker rm traefik
 Restart=always
 
 [Install]

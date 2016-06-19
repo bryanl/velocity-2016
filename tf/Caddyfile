@@ -1,23 +1,29 @@
 :80 {
   redir https://{host}{uri}
 
+  errors
   log stderr
 }
 
-https://traefik.site.x.pifft.com {
-  proxy / kube-frontend.weave.local:80 {
+https://backend.site.x.pifft.com {
+  basicauth / demo demo
+  proxy / traefik.weave.local:8080 {
     proxy_header Host {host}
   }
 
   tls /etc/caddy/ssl/site.crt /etc/caddy/ssl/site.key
+
+  errors
   log stderr
 }
 
 :443 {
-  proxy / kube-frontend.wave.local:8080 {
+  basicauth / demo demo
+  proxy / traefik.weave.local:80 {
     proxy_header Host {host}
   }
   tls /etc/caddy/ssl/site.crt /etc/caddy/ssl/site.key
 
+  errors
   log stderr
 }

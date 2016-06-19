@@ -4,8 +4,9 @@ Documentation=https://caddyserver.com/docs
 After=network.target
 
 [Service]
-ExecStart=/usr/bin/docker run -p 80:80 -p 443:443 -v /etc/caddy/ssl:/etc/caddy/ssl -v /etc/caddy/Caddyfile:/etc/Caddyfile -v /var/run/weave/weave.sock:/var/run/docker.sock --name caddy abiosoft/caddy
-ExecStop=/usr/bin/docker stop -t 2 caddy; /usr/bin/docker rm -f caddy
+Environment=DOCKER_HOST=unix:///var/run/weave/weave.sock
+ExecStart=/usr/bin/docker run -p 80:80 -p 443:443 -v /etc/caddy/ssl:/etc/caddy/ssl -v /etc/caddy/Caddyfile:/etc/Caddyfile --name caddy abiosoft/caddy
+ExecStop=/usr/bin/docker stop -t 2 caddy && /usr/bin/docker rm caddy
 Restart=always
 
 [Install]

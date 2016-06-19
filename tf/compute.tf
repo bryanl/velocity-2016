@@ -201,7 +201,7 @@ resource "digitalocean_droplet" "frontend" {
       "EOF",
       "echo \"${template_file.traefik_service.rendered}\" > /etc/systemd/system/traefik.service",
       "echo \"${template_file.traefik_kubernetes_token.rendered}\" > /var/run/secrets/kubernetes.io/serviceaccount/token",
-      "echo \"${template_file.traefik_kubernetes_cacert.rendered}\" > /var/run/secrets/kubernetes.io/serviceaccount/ca.cert"
+      "echo \"${template_file.traefik_kubernetes_cacert.rendered}\" > /var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
     ]
   }
 }
