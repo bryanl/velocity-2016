@@ -1,0 +1,39 @@
+filter {
+  grok {
+    match => {
+      "source" => "/var/log/containers/(?<pod>.*?)_(?<namespace>.*?)_(?<replication_controller>.*?)-(?<container_id>.*?).log"
+    }
+  }
+
+  mutate {
+    remove_field => ["source"]
+  }
+
+  json {
+    source => "log"
+  }
+
+  date {
+    match => ["time", "ISO8601"]
+    remove_field => ["time"]
+  }
+
+    mutate {
+      rename => ["log", "message"]
+    }
+}
+
+
+input {
+  beats {
+    port => 5044
+    ssl => false
+    codec => "json"
+  }
+}
+
+output {
+  elasticsearch {
+    hosts => ["elasticsearch:9200"]
+  }
+}
