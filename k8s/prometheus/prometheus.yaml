@@ -1,3 +1,7 @@
+global:
+  scrape_interval:     5s # By default, scrape targets every 15 seconds.
+  evaluation_interval: 5s # By default, scrape targets every 15 seconds.
+
 # A scrape configuration for running Prometheus on a Kubernetes cluster.
 # This uses separate scrape configs for cluster components (i.e. API server, node)
 # and services to allow each to use different authentication configs.
@@ -7,6 +11,17 @@
 
 # Scrape config for cluster components.
 scrape_configs:
+- job_name: 'prometheus'
+
+  # Override the global default and scrape targets from this job every 5 seconds.
+  scrape_interval: 5s
+
+  # metrics_path defaults to '/metrics'
+  # scheme defaults to 'http'.
+
+  static_configs:
+    - targets: ['localhost:9090']
+
 - job_name: 'kubernetes-cluster'
 
   # This TLS & bearer token file config is used to connect to the actual scrape
@@ -14,6 +29,7 @@ scrape_configs:
   # configuration (`in_cluster` below) because discovery & scraping are two
   # separate concerns in Prometheus.
   tls_config:
+    insecure_skip_verify: true
     ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
   bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
 
@@ -31,6 +47,10 @@ scrape_configs:
   - source_labels: [__meta_kubernetes_role]
     action: replace
     target_label: kubernetes_role
+  - source_labels: [__scheme__]
+    action: replace
+    replacement: 'https'
+    target_label: __scheme__
 
 # Scrape config for service endpoints.
 #
