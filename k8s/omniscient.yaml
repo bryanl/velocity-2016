@@ -32,6 +32,8 @@ metadata:
   labels:
     app: omniscient
     tier: frontend
+  annotations:
+    prometheus.io/scrape: "true"
 spec:
   ports:
   - port: 80
