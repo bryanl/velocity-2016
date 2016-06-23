@@ -1,0 +1,52 @@
+---
+- name: configure sysctl
+  template: src=kubernetes.conf dest=/etc/sysctl.d/50-kubernetes.conf owner=root group=root mode=0644
+  notify:
+    - reload sysctl
+
+- name: configure docker apt key
+  apt_key: keyserver=p80.pool.sks-keyservers.net id=58118E89F3A912897C070ADBF76221572C52609D state=present
+
+- name: add docker source
+  apt_repository: repo='deb https://apt.dockerproject.org/repo ubuntu-xenial main' state=present
+
+- name: install docker
+  apt: name=docker-engine update_cache=yes
+
+- name: download weave
+  get_url: url=https://github.com/weaveworks/weave/releases/download/v{{ weave_version }}/weave dest=/usr/bin/weave mode=0775 checksum=sha1:{{ weave_sha1 }}
+
+- name: "weave: setup"
+  command: /usr/bin/weave setup
+
+- name: "weave: set weave_hosts fact"
+  set_fact:
+    weave_hosts: "{{ groups['type_digitalocean_droplet'] | difference([inventory_hostname]) }}"
+
+- name: "weave: create /etc/weave.env"
+  template: src=weave.env dest=/etc/weave.env owner=root group=root mode=0644
+
+- name: "weave: create weave services"
+  template: src={{ item }}.service dest=/etc/systemd/system/{{ item }}.service owner=root group=root mode=0644
+  with_items:
+    - "weave"
+    - "weave-proxy"
+
+- name: reload systemd
+  command: /bin/systemctl daemon-reload
+
+- name: "weave: launch weave services"
+  service: name="{{ item }}" enabled=yes state=started
+  with_items:
+    - "weave"
+    - "weave-proxy"
+
+- name: "weave: update peers"
+  template: src=weave_peers.j2 dest=/etc/weave_peers owner=root group=root mode=0644
+
+- name: "weave: create peer connections"
+  shell: for c in $(cat /etc/weave_peers); do /usr/bin/weave connect $c; done
+  tags: "update-connections"
+
+- name: "weave: expose host"
+  shell: /usr/bin/weave expose -h $(hostname).weave.local

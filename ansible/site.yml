@@ -1,0 +1,9 @@
+- hosts: type_digitalocean_droplet
+  become: true
+  become_user: root
+  roles:
+    - { role: common }
+  tags:
+    - common
+
+

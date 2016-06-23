@@ -51,6 +51,8 @@ done
 
 eval $(/usr/bin/weave env)
 
+NODE_IP=$(ifconfig weave | grep 'inet addr:' | cut -d: -f2 | cut -f1 | awk '{print $1}')
+
 save_last_run_log_and_cleanup() {
   if [[ $(docker inspect --format='{{.State.Status}}' $1) = 'exited' ]]
   then
@@ -117,6 +119,7 @@ case "$(hostname)" in
     docker run --name=kubelet-pki bryanl/k8s-anywhere:kubelet-pki
     docker run -d \
       --env="USE_CNI=yes" \
+      --env="NODE_IP=$NODE_IP" \
       --name=kubelet \
       --privileged=true \
       --net=host \

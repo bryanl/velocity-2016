@@ -1,0 +1,16 @@
+[Unit]
+Description=Weave Router
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+TimeoutStartSec=0
+EnvironmentFile=/etc/weave.env
+ExecStartPre=-/usr/bin/docker kill weave
+ExecStartPre=-/usr/bin/docker rm weave
+ExecStart=/usr/bin/weave launch-router --init-peer-count ${INIT_PEER_COUNT}
+
+[Install]
+WantedBy=multi-user.target

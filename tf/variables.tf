@@ -72,3 +72,11 @@ variable "lb_subdomain" {}
 variable "traefik_kubernetes_token" {}
 
 variable "traefik_kubernetes_cacert" {}
+
+variable "droplet_user_data" {
+  default = <<EOT
+#cloud-config
+packages:
+  - python
+EOT
+}

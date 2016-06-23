@@ -1,0 +1,16 @@
+[Unit]
+Description=Weave Proxy
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+TimeoutStartSec=0
+EnvironmentFile=/etc/weave.env
+ExecStartPre=-/usr/bin/docker kill weaveproxy
+ExecStartPre=-/usr/bin/docker rm weaveproxy
+ExecStart=/usr/bin/weave launch-proxy --rewrite-inspect
+
+[Install]
+WantedBy=multi-user.target

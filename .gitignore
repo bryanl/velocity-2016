@@ -4,3 +4,4 @@ tf/terraform.tfvars
 tf/.terraform
 .DS_Store
 tmp
+ansible/site.retry
