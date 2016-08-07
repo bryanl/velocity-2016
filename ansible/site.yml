@@ -6,4 +6,11 @@
   tags:
     - common
 
+- hosts: etcd
+  become: true
+  become_user: root
+  roles:
+    - { role: etcd }
+  tags:
+    - etcd
 

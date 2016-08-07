@@ -1,0 +1,14 @@
+[Unit]
+Description=etcd
+After=docker.service
+
+[Service]
+ExecStartPre=-/usr/bin/docker kill etcd
+ExecStartPre=-/usr/bin/docker rm etcd
+ExecStart=/usr/bin/docker run --env="ETCD_CLUSTER_SIZE=3" --name=%H bryanl/k8s-do:etcd-v1.2
+ExecStop=/usr/bin/docker stop -t 2 etcd
+ExecStop=/usr/bin/docker rm etcd
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

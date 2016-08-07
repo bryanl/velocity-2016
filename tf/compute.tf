@@ -1,7 +1,7 @@
 resource "digitalocean_droplet" "etcd" {
   count = "${var.etcd_count}"
   image = "${var.image}"
-  name = "kube-etcd-${count.index+1}"
+  name = "etcd${count.index+1}"
   region = "${var.region}"
   size = "${var.etcd_size}"
   private_networking = true

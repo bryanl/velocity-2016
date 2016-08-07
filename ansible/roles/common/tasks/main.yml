@@ -1,4 +1,7 @@
 ---
+- debug: msg="{{ hostvars[inventory_hostname]}}"
+
+
 - name: configure sysctl
   template: src=kubernetes.conf dest=/etc/sysctl.d/50-kubernetes.conf owner=root group=root mode=0644
   notify:

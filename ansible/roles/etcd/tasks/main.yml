@@ -1,0 +1,11 @@
+---
+- name: create etcd service unit
+  template: src=etcd.service dest=/etc/systemd/system/etcd.service owner=root group=root mode=0644
+  register: etcd_service_unit
+
+- name: reload systemd units
+  command: systemctl daemon-reload
+  when: "etcd_service_unit.changed"
+
+- name: launch etcd service
+  service: name=etcd enabled=yes state=started
